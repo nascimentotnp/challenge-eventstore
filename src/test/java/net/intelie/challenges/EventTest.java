@@ -1,10 +1,10 @@
 package net.intelie.challenges;
 
+import junit.framework.TestCase;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+public class EventTest extends TestCase {
 
-public class EventTest {
     @Test
     public void thisIsAWarning() throws Exception {
         Event event = new Event("some_type", 123L);
