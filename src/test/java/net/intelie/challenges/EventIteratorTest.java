@@ -2,21 +2,17 @@ package net.intelie.challenges;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mock;
-
 
 import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class EventIteratorTest {
-	@Mock
-	EventIteratorImpl iteratorTree;
-	public SortedSet<Event> event = Collections.synchronizedSortedSet(new TreeSet<>());
 
+	SortedSet<Event> event = Collections.synchronizedSortedSet(new TreeSet<>());
+	EventIterator iteratorTree = new EventIteratorImpl("type1", null);
 
 	@Test
 	public void testMoveNextWithoutEvents() {
@@ -51,14 +47,14 @@ public class EventIteratorTest {
 	public void testMoveNextIsFalse() {
 		iteratorTree = new EventIteratorImpl("type1", event.iterator());
 		while (iteratorTree.moveNext()) {
+			Assert.assertTrue(iteratorTree.moveNext());
 		}
-		Assert.assertFalse(iteratorTree.moveNext());
 	}
 
 	@Test
 	public void testCurrentEmptySet() {
 		iteratorTree = new EventIteratorImpl("type1", event.iterator());
-		assertThrows(IllegalStateException.class, () -> {iteratorTree.current();});
+		assertThrows(IllegalStateException.class, iteratorTree::current);
 	}
 
 	@Test
@@ -67,34 +63,33 @@ public class EventIteratorTest {
 		event.add(new Event("type1", 123L));
 		iteratorTree = new EventIteratorImpl("type1", event.iterator());
 		EventIterator eventIteratorResult = new EventIteratorImpl("Type2",event.iterator());
-		assertThrows(IllegalStateException.class, () -> {eventIteratorResult.current();});
+		assertThrows(IllegalStateException.class, eventIteratorResult::current);
 	}
-
 
 	@Test
 	public void testCurrentSetOneWithoutMoveNext() {
 		SortedSet<Event> event = Collections.synchronizedSortedSet(new TreeSet<>());
 		event.add(new Event("type1", 123L));
-		iteratorTree = new EventIteratorImpl("type1", event.iterator());
-		EventIterator eventIteratorResult = new EventIteratorImpl("Type1",event.iterator());
+		event.add(new Event("type2", 1234L));
+		EventIterator eventIteratorResult = new EventIteratorImpl("type1", event.iterator());
 		eventIteratorResult.moveNext();
-		Assert.assertTrue(iteratorTree.moveNext());
+		Assert.assertNotNull(eventIteratorResult.current());
 	}
+
 	@Test
-	public void testCurrentSetOneWithErrorMoveNext() {
+	public void testCurrentSetOneWithNotFoundMoveNext() {
 		SortedSet<Event> event = Collections.synchronizedSortedSet(new TreeSet<>());
 		event.add(new Event("type1", 123L));
-		iteratorTree = new EventIteratorImpl("type1", event.iterator());
 		EventIterator eventIteratorResult = new EventIteratorImpl("Type1",event.iterator());
 		eventIteratorResult.moveNext();
-		Assert.assertNotNull(iteratorTree.moveNext());
+		Assert.assertFalse(eventIteratorResult.moveNext());
 	}
 
 
 	@Test
 	public void testRemoveEmptySet() {
 		iteratorTree = new EventIteratorImpl("type1", event.iterator());
-		assertThrows(IllegalStateException.class, () -> {iteratorTree.remove();});
+		assertThrows(IllegalStateException.class, () -> iteratorTree.remove());
 	}
 
 	@Test
@@ -102,7 +97,17 @@ public class EventIteratorTest {
 		SortedSet<Event> event = Collections.synchronizedSortedSet(new TreeSet<>());
 		event.add(new Event("type1", 123L));
 		EventIterator eventIteratorResult = new EventIteratorImpl("Type2",event.iterator());
-		assertThrows(IllegalStateException.class, () -> {eventIteratorResult.remove();});
+		assertThrows(IllegalStateException.class, eventIteratorResult::remove);
+	}
+
+	@Test
+	public void testRemoveEventSuccess() {
+		SortedSet<Event> event = Collections.synchronizedSortedSet(new TreeSet<>());
+		event.add(new Event("type1", 123L));
+		EventIterator eventIteratorResult = new EventIteratorImpl("type1",event.iterator());
+		Assert.assertTrue(eventIteratorResult.moveNext());
+		eventIteratorResult.remove();
+		Assert.assertFalse(eventIteratorResult.moveNext());
 	}
 
 

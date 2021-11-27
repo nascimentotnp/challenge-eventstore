@@ -8,7 +8,7 @@ import java.util.TreeSet;
 public class EventStoreImpl implements EventStore{
 
     private final SortedSet<Event> treeSet;
-    public TreeSet<Event> set() {return (TreeSet<Event>) treeSet;}
+
     public EventStoreImpl(){
         this.treeSet = Collections.synchronizedSortedSet(new TreeSet<>());
     }
